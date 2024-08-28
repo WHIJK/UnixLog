@@ -24,11 +24,20 @@ func parseAudit(line string, sm *model.SyncMaps) map[string]string {
 	}
 
 	partBySpace := strings.Split(partsFirst+partsSecond, " ")
+	// 例如 new pid=1111 , 空格分割为两个循环, 因此将new拼接到下一个pid中
+	var temp string
 	for _, val := range partBySpace {
 		keyValue := strings.SplitN(val, "=", 2)
 		if len(keyValue) != 2 {
-			logrus.Errorf("Parsing %s error.", keyValue)
+			//logrus.Errorf("Parsing key=value error, %s.", val)
+			temp = val
 			continue
+		}
+
+		// 拼接
+		if temp != "" {
+			keyValue[0] = temp + keyValue[0]
+			temp = ""
 		}
 		// 时间戳解析
 		if strings.HasPrefix(keyValue[1], "audit(") {
